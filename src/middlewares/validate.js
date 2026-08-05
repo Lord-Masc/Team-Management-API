@@ -11,3 +11,5 @@ const validate = (req,res,next)=>{
         errors:errors.array()
     })
 }
+
+module.exports = validate
