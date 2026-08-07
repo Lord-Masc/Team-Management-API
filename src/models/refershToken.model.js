@@ -1,24 +1,24 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
-const refreshTokenSchema = new mongoose.Schema({
-    user:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User",
-        require:true
+const refreshTokenSchema = new mongoose.Schema(
+    {
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+        },
+        token: {
+            type: String,
+            required: true,
+        },
+        expiredAt: {
+            type: Date,
+            required: true,
+        },
     },
-    token:{
-        type:String,
-        reuire:true,
-    },
-    expiredAt:{
-        type:Date,
-        require:true
-    }
-},{timestamps:true})
+    { timestamps: true }
+);
 
-refreshTokenSchemah.index(
-    {expiredAt:1},
-    {expiredAferSecond:0}
-)
+refreshTokenSchema.index({ expiredAt: 1 }, { expireAfterSeconds: 0 });
 
-module.exports = mongoose.Schema("RefreshToken",refreshTokenSchema)
+export default mongoose.model("RefreshToken", refreshTokenSchema);
