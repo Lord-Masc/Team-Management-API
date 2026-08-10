@@ -109,7 +109,7 @@ const login = asyncHandler(async (req, res, next) => {
 
 const refershToken = asyncHandler(async(req,res)=>{
 
-    const token = req.cookie.refershToken;
+    const token = req.cookies.refershToken;
     if(!token) throw new ApiError(401,"Refersh Token is required")
     
     let decode;
@@ -151,4 +151,38 @@ const refershToken = asyncHandler(async(req,res)=>{
 
 })
 
-export default { register, login };
+
+const logout = asyncHandler(async(req,res)=>{
+    const token = req.cookies.refershToken
+    if(token) await RefreshToken.deleteOne({token})
+
+    res.clearCookie("refershToken",{
+        httpOnly:true,
+        secure:process.env.NODE_ENV==="production",
+        sameSite:"strict"
+    })
+
+    res.status(200).json({
+        sucess:true,
+        message:"logout user successfull"
+      
+    })
+})
+
+const logoutAll = asyncHandler(async(req,res)=>{
+    await RefreshToken.deleteMany({
+        user:req.user.id
+    })
+
+    res.clearCookie("refershToken",{
+        httpOnly:true,
+        secure:process.env.NODE_ENV==="production",
+        sameSite:"strict"
+    })
+    res.status(200).json({
+        success:true,
+        message:"Logout from all devices successfull"
+    })
+})
+
+export default { register, login ,refershToken, logout ,logoutAll};
