@@ -185,4 +185,5 @@ const logoutAll = asyncHandler(async(req,res)=>{
     })
 })
 
-export default { register, login ,refershToken, logout ,logoutAll};
+export { register, login, refershToken, logout, logoutAll };
+export default { register, login, refershToken, logout, logoutAll };
