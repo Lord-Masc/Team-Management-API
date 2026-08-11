@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken"
 import ApiError from "../utils/ApiError.js"
+import asyncHandler from "./asyncHandler.js";
 
 const protect = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -24,22 +25,35 @@ const protect = (req, res, next) => {
   }
 };
 
-const authorize = (...role)=>{
-    return (req,res,next)=>{
-      if(!req.user){
-        return next(
-           new ApiError(401,"Authentiation required")
-        )
-      }
-
-      if(!role.includes(req.user.role)){
-        return next(
-          new ApiError(40,"You are not allow to access this code")
-        )
-      }
-      next()
-
+const authorize = (...role) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return next(new ApiError(401, "Authentication required"));
     }
-}
 
-module.exports = {protect,authorize} ;
+    if (!role.includes(req.user.role)) {
+      return next(new ApiError(403, "You are not allowed to access this resource"));
+    }
+    next();
+  };
+};
+
+const getMe = asyncHandler(async(req,res)=>{
+  res.status(200).json({
+    sucess:true,
+    message:"Currect user fetch successfully",
+    data:{
+      user:{
+          id:req.user._id,
+          name:req.user.name,
+          email:req.user.email,
+          role:req.user.role,
+          isVerified:req.user.isVerified
+      }
+    }
+  })
+})
+
+export { authorize,getMe };
+export default protect;
+// module.exports = {protect,authorize} ;

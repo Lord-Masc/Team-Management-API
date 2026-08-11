@@ -107,77 +107,58 @@ const login = asyncHandler(async (req, res, next) => {
     });
 });
 
-const refershToken = asyncHandler(async(req,res)=>{
+const refreshToken = asyncHandler(async (req, res) => {
+    const token = req.cookies.refreshToken;
+    if (!token) throw new ApiError(401, "Refresh token is required");
 
-    const token = req.cookies.refershToken;
-    if(!token) throw new ApiError(401,"Refersh Token is required")
-    
     let decode;
-
-    try{
-
+    try {
         // decode holds user id
-        decode = jwt.verify(
-            token,
-            process.env.JWT_REFRESH_SECRET
-        )
-    }catch(err){
-        throw new ApiError(401,"Invalid or expired refersh Token")
+        decode = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+    } catch (err) {
+        throw new ApiError(401, "Invalid or expired refresh token");
     }
 
-    const storedToken = await RefreshToken.findOne({
-        token,
-        user:decode.id
-    })
+    const storedToken = await RefreshToken.findOne({ token, user: decode.id });
+    if (!storedToken) throw new ApiError(401, "Refresh token has been revoked or does not exist");
 
-    if(!storedToken) throw new ApiError(401,"Refresh token has been revoked or does not exist")
+    const user = await User.findById(decode.id);
+    if (!user) throw new ApiError(401, "User no longer exists");
 
-    
-
-    const user = await User.findOne(decode.id)
-
-    if(!user) throw new ApiError(401,"User no longer exists")
-    
-        const accessToken = generateAccessToken(user)
+    const accessToken = generateAccessToken(user);
     res.status(200).json({
-        sucess:true,
-        message:"Token refersh successfully",
-        data:{
-            accessToken
-        }
-
-    })
+        success: true,
+        message: "Token refreshed successfully",
+        data: { accessToken },
+    });
+});
 
 
-})
+const logout = asyncHandler(async (req, res) => {
+    const token = req.cookies.refreshToken;
+    if (token) await RefreshToken.deleteOne({ token });
 
-
-const logout = asyncHandler(async(req,res)=>{
-    const token = req.cookies.refershToken
-    if(token) await RefreshToken.deleteOne({token})
-
-    res.clearCookie("refershToken",{
-        httpOnly:true,
-        secure:process.env.NODE_ENV==="production",
-        sameSite:"strict"
-    })
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+    });
 
     res.status(200).json({
-        sucess:true,
-        message:"logout user successfull"
-      
-    })
-})
+        success: true,
+        message: "Logout successful",
+    });
+});
 
 const logoutAll = asyncHandler(async(req,res)=>{
     await RefreshToken.deleteMany({
         user:req.user.id
     })
 
-    res.clearCookie("refershToken",{
-        httpOnly:true,
-        secure:process.env.NODE_ENV==="production",
-        sameSite:"strict"
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
     })
     res.status(200).json({
         success:true,
@@ -185,5 +166,4 @@ const logoutAll = asyncHandler(async(req,res)=>{
     })
 })
 
-export { register, login, refershToken, logout, logoutAll };
-export default { register, login, refershToken, logout, logoutAll };
+export { register, login, refreshToken, logout, logoutAll };
