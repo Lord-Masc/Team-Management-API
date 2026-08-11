@@ -166,4 +166,20 @@ const logoutAll = asyncHandler(async(req,res)=>{
     })
 })
 
-export { register, login, refreshToken, logout, logoutAll };
+const getMe = asyncHandler(async(req,res)=>{
+  res.status(200).json({
+    sucess:true,
+    message:"Currect user fetch successfully",
+    data:{
+      user:{
+          id:req.user._id,
+          name:req.user.name,
+          email:req.user.email,
+          role:req.user.role,
+          isVerified:req.user.isVerified
+      }
+    }
+  })
+})
+
+export { register, login, refreshToken, logout, logoutAll,getMe };

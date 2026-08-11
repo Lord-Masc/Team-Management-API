@@ -54,6 +54,6 @@ const getMe = asyncHandler(async(req,res)=>{
   })
 })
 
-export { authorize,getMe };
+export { authorize };
 export default protect;
 // module.exports = {protect,authorize} ;
