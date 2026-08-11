@@ -24,4 +24,22 @@ const protect = (req, res, next) => {
   }
 };
 
-export default protect;
+const authorize = (...role)=>{
+    return (req,res,next)=>{
+      if(!req.user){
+        return next(
+           new ApiError(401,"Authentiation required")
+        )
+      }
+
+      if(!role.includes(req.user.role)){
+        return next(
+          new ApiError(40,"You are not allow to access this code")
+        )
+      }
+      next()
+
+    }
+}
+
+module.exports = {protect,authorize} ;
